@@ -48,8 +48,16 @@ func run(repo string) error {
 	for _, v := range pony {
 		println("  " + v.Key + " " + strconv.Itoa(v.Occurrence))
 	}
-	fmt.Printf("Dev power %0.2f: ", histogram.DevPower())
+	fmt.Printf("Dev power %0.2f\n", histogram.DevPower())
 
+	res, err := AVL(repo)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("AVL bus factor: %d\n", len(res))
+	for _, author := range res {
+		fmt.Println("  " + author)
+	}
 	return nil
 }
 
