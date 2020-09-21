@@ -118,6 +118,10 @@ func AVL(repo string) ([]string, error) {
 	command := exec.Command("git", "log", "--name-status", "--find-renames", "--pretty=format:commit %H %ae")
 	command.Dir = repo
 
+	alias, err := ReadGitAuthorAlias(repo)
+	if err != nil {
+		return codeOwners, err
+	}
 	r, _ := command.StdoutPipe()
 
 	done := make(chan struct{})
@@ -130,7 +134,7 @@ func AVL(repo string) ([]string, error) {
 			line := scanner.Text()
 			parts := strings.Split(strings.TrimSpace(line), " ")
 			if parts[0] == "commit" {
-				currentAuthor = parts[2]
+				currentAuthor = alias.Normalize(parts[2])
 			} else {
 				parts = strings.Split(strings.TrimSpace(line), "\t")
 				if parts[0] == "D" {
@@ -149,7 +153,7 @@ func AVL(repo string) ([]string, error) {
 		}
 		done <- struct{}{}
 	}()
-	err := command.Start()
+	err = command.Start()
 	if err != nil {
 		return codeOwners, err
 	}

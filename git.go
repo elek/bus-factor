@@ -10,6 +10,26 @@ import (
 	"strings"
 )
 
+type GitAuthorAlias struct {
+	Aliases map[string]string
+}
+
+func ReadGitAuthorAlias(repo string) (GitAuthorAlias, error) {
+	mp, err := readAlias(repo)
+	if err != nil {
+		return GitAuthorAlias{}, err
+	} else {
+		return GitAuthorAlias{mp}, nil
+	}
+}
+
+func (ga *GitAuthorAlias) Normalize(author string) string {
+	if alias, found := ga.Aliases[author]; found {
+		return alias
+	} else {
+		return author
+	}
+}
 func ReadGitLog(repo string) (Histogram, error) {
 	histogram := NewHistogram()
 
@@ -25,13 +45,13 @@ func ReadGitLog(repo string) (Histogram, error) {
 
 	cIter, err := r.Log(&git.LogOptions{From: ref.Hash()})
 
-	alias, err := readAlias(repo)
+	alias, err := ReadGitAuthorAlias(repo)
 	if err != nil {
 		return histogram, err
 	}
 
 	err = cIter.ForEach(func(c *object.Commit) error {
-		histogram.Increment(normalize(c.Author.Email, alias))
+		histogram.Increment(alias.Normalize(c.Author.Email))
 		return nil
 	})
 	if err != nil {
@@ -69,10 +89,3 @@ func readAliasFile(file string) (map[string]string, error) {
 	return alias, nil
 }
 
-func normalize(email string, aliases map[string]string) string {
-	if alias, found := aliases[email]; found {
-		return alias
-	} else {
-		return email
-	}
-}
