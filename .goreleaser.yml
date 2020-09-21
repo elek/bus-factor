@@ -7,8 +7,8 @@ builds:
       - goos: darwin
         goarch: 386
 
-archive:
-  replacements:
+archives:
+- replacements:
     darwin: Darwin
     linux: Linux
     amd64: x86_64
@@ -22,9 +22,9 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
-brew:
- github:
-   owner: elek
-   name: homebrew-brew
- description: "CLI app to calculate Bus/Truck/Pony factory from git history"
+brews:
+- github:
+    owner: elek
+    name: homebrew-brew
+  description: "CLI app to calculate Bus/Truck/Pony factory from git history"
 
