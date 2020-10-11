@@ -3,16 +3,17 @@ package main
 import (
 	"fmt"
 	"github.com/urfave/cli"
+	"math"
 )
 
-func (h *Histogram) DevPower() float32 {
-	result := float32(0)
-	base := float32(0)
+func (h *Histogram) DevPower() float64 {
+	result := float64(0)
+	base := float64(0)
 	for _, entry := range h.SortedView() {
 		if base == 0 {
-			base = float32(entry.Occurrence)
+			base = math.Sqrt(float64(entry.Occurrence))
 		}
-		result += float32(entry.Occurrence) / base
+		result += math.Sqrt(float64(entry.Occurrence)) / base
 	}
 	return result
 }
