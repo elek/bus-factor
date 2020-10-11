@@ -14,9 +14,12 @@ func main() {
 		cli.StringFlag{
 			Name: "repo",
 		},
+		cli.BoolFlag{
+			Name: "timed",
+		},
 	}
 	App.Action = func(ctx *cli.Context) error {
-		return run(repo(ctx.String("repo")))
+		return run(repo(ctx.String("repo")), ctx.Bool("timed"))
 	}
 	err := App.Run(os.Args)
 
@@ -37,16 +40,24 @@ func repo(s string) string {
 	return pwd
 }
 
-func run(repo string) error {
+func run(repo string, timed bool) error {
+	var histogram Histogram
+	var err error
+	if timed {
+		histogram, err = TimeDiscountedGitLog(repo)
 
-	histogram, err := ReadGitLog(repo)
+	} else {
+		histogram, err = ReadGitLog(repo)
+
+	}
 	if err != nil {
 		return err
 	}
+
 	pony := histogram.PonyDevs()
 	println("Pony number: " + strconv.Itoa(len(pony)))
 	for _, v := range pony {
-		println("  " + v.Key + " " + strconv.Itoa(v.Occurrence))
+		println(fmt.Sprintf("   %s %02f", v.Key, v.Occurrence))
 	}
 	fmt.Printf("Dev power %0.2f\n", histogram.DevPower())
 

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/urfave/cli"
-	"math"
 )
 
 func (h *Histogram) DevPower() float64 {
@@ -11,11 +10,17 @@ func (h *Histogram) DevPower() float64 {
 	base := float64(0)
 	for _, entry := range h.SortedView() {
 		if base == 0 {
-			base = math.Sqrt(float64(entry.Occurrence))
+			base = float64(entry.Occurrence)
 		}
-		result += math.Sqrt(float64(entry.Occurrence)) / base
+		result += float64(entry.Occurrence) / base
 	}
 	return result
+}
+
+func NewDoubleHistogram() DoubleHistogram {
+	return DoubleHistogram{
+		Histograms: make(map[string]*Histogram),
+	}
 }
 
 func init() {

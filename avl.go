@@ -134,7 +134,11 @@ func AVL(repo string) ([]string, error) {
 			line := scanner.Text()
 			parts := strings.Split(strings.TrimSpace(line), " ")
 			if parts[0] == "commit" {
-				currentAuthor = alias.Normalize(parts[2])
+				if len(parts) < 3 {
+					currentAuthor = "UNKNOWN"
+				} else {
+					currentAuthor = alias.Normalize(parts[2])
+				}
 			} else {
 				parts = strings.Split(strings.TrimSpace(line), "\t")
 				if parts[0] == "D" {

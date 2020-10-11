@@ -60,6 +60,37 @@ func ReadGitLog(repo string) (Histogram, error) {
 	return histogram, nil
 }
 
+func ReadMonthlyGitLog(repo string) (DoubleHistogram, error) {
+	histogram := NewDoubleHistogram()
+
+	r, err := git.PlainOpen(repo)
+	if err != nil {
+		return histogram, err
+	}
+
+	ref, err := r.Head()
+	if err != nil {
+		return histogram, err
+	}
+
+	cIter, err := r.Log(&git.LogOptions{From: ref.Hash()})
+
+	alias, err := ReadGitAuthorAlias(repo)
+	if err != nil {
+		return histogram, err
+	}
+
+	err = cIter.ForEach(func(c *object.Commit) error {
+		commiterDate := c.Committer.When
+		monthString := fmt.Sprintf("%d-%02d", commiterDate.Year(), int(commiterDate.Month())+1)
+		histogram.Get(monthString).Increment(alias.Normalize(c.Author.Email))
+		return nil
+	})
+	if err != nil {
+		return histogram, err
+	}
+	return histogram, nil
+}
 func readAlias(repoPath string) (map[string]string, error) {
 	aliasFile := path.Join(repoPath, ".git", "bus-factor-alias")
 	if _, err := os.Stat(aliasFile); os.IsNotExist(err) {
