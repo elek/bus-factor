@@ -8,6 +8,24 @@ import (
 func (h *Histogram) DevPower() float64 {
 	result := float64(0)
 	base := float64(0)
+	weight := float64(1)
+	previous := float64(1)
+	for _, entry := range h.SortedView() {
+		if base == 0 {
+			base = float64(entry.Occurrence)
+		} else {
+			weight = weight * entry.Occurrence / previous
+		}
+		previous = entry.Occurrence
+
+		result += (float64(entry.Occurrence) / base) * weight
+	}
+	return result
+}
+
+func (h *Histogram) RawDevPower() float64 {
+	result := float64(0)
+	base := float64(0)
 	for _, entry := range h.SortedView() {
 		if base == 0 {
 			base = float64(entry.Occurrence)
