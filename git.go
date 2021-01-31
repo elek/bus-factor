@@ -60,7 +60,7 @@ func ReadGitLog(repo string) (Histogram, error) {
 	return histogram, nil
 }
 
-func ReadMonthlyGitLog(repo string) (DoubleHistogram, error) {
+func ReadMonthlyGitLog(repo string, window string) (DoubleHistogram, error) {
 	histogram := NewDoubleHistogram()
 
 	r, err := git.PlainOpen(repo)
@@ -72,7 +72,6 @@ func ReadMonthlyGitLog(repo string) (DoubleHistogram, error) {
 	if err != nil {
 		return histogram, err
 	}
-
 	cIter, err := r.Log(&git.LogOptions{From: ref.Hash()})
 
 	alias, err := ReadGitAuthorAlias(repo)
@@ -82,8 +81,17 @@ func ReadMonthlyGitLog(repo string) (DoubleHistogram, error) {
 
 	err = cIter.ForEach(func(c *object.Commit) error {
 		commiterDate := c.Committer.When
-		monthString := fmt.Sprintf("%d-%02d", commiterDate.Year(), int(commiterDate.Month())+1)
-		histogram.Get(monthString).Increment(alias.Normalize(c.Author.Email))
+		category := "unknown"
+		switch window {
+		case "Y":
+			category = fmt.Sprintf("%d", commiterDate.Year())
+		case "Q":
+			category = fmt.Sprintf("%d-%02d", commiterDate.Year(), (commiterDate.Month()-1)/3+1)
+		case "M":
+			category = fmt.Sprintf("%d-%02d", commiterDate.Year(), commiterDate.Month())
+		}
+
+		histogram.Get(category).Increment(alias.Normalize(c.Author.Email))
 		return nil
 	})
 	if err != nil {

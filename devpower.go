@@ -14,7 +14,11 @@ func (h *Histogram) DevPower() float64 {
 		if base == 0 {
 			base = float64(entry.Occurrence)
 		} else {
-			weight = weight * entry.Occurrence / previous
+			if entry.Occurrence > 0 {
+				weight = weight * entry.Occurrence / previous
+			} else {
+				weight = 0
+			}
 		}
 		previous = entry.Occurrence
 

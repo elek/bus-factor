@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
+	cli "github.com/urfave/cli"
 	"os"
 	"strconv"
 )
@@ -14,12 +14,33 @@ func main() {
 		cli.StringFlag{
 			Name: "repo",
 		},
-		cli.BoolFlag{
-			Name: "timed",
-		},
 	}
-	App.Action = func(ctx *cli.Context) error {
-		return run(repo(ctx.String("repo")), ctx.Bool("timed"))
+	App.Commands = []cli.Command{
+		{
+			Name: "summary",
+
+			Action: func(ctx *cli.Context) error {
+				return run(repo(ctx.String("repo")))
+			},
+		},
+		{
+			Name: "timeline",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name: "repo",
+				},
+				cli.BoolFlag{
+					Name: "verbose",
+				},
+				cli.StringFlag{
+					Name:  "window",
+					Value: "Q",
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				return timeline(repo(ctx.String("repo")), ctx.String("window"), ctx.Bool("verbose"))
+			},
+		},
 	}
 	err := App.Run(os.Args)
 
@@ -40,16 +61,33 @@ func repo(s string) string {
 	return pwd
 }
 
-func run(repo string, timed bool) error {
+func timeline(repo string, window string, verbose bool) error {
+	histogram, err := ReadMonthlyGitLog(repo, window)
+	if err != nil {
+		return err
+	}
+	timeline, err := histogram.Timelined()
+	if err != nil {
+		return err
+	}
+	for _, category := range timeline.Keys() {
+		month := timeline.Get(category)
+		fmt.Printf("%s %.2f\n", category, month.DevPower())
+		if verbose {
+			for _, v := range month.SortedView() {
+				if v.Occurrence != 0 {
+					fmt.Printf("   %s %f\n", v.Key, v.Occurrence)
+				}
+			}
+		}
+	}
+
+	return nil
+}
+func run(repo string) error {
 	var histogram Histogram
 	var err error
-	if timed {
-		histogram, err = TimeDiscountedGitLog(repo)
-
-	} else {
-		histogram, err = ReadGitLog(repo)
-
-	}
+	histogram, err = ReadGitLog(repo)
 	if err != nil {
 		return err
 	}

@@ -17,6 +17,16 @@ func NewHistogram() Histogram {
 	}
 }
 
+func CopyHistogram(h Histogram) Histogram {
+	nm := make(map[string]float64)
+	for k, v := range h.Events {
+		nm[k] = v
+	}
+	return Histogram{
+		Events: nm,
+	}
+}
+
 func (h *Histogram) Increment(key string) {
 	if _, found := h.Events[key]; !found {
 		h.Events[key] = 1
