@@ -69,6 +69,13 @@ func run(repo string, timed bool) error {
 	for _, author := range res {
 		fmt.Println("  " + author)
 	}
+	fmt.Printf("Sum of points: %0.01f\n", histogram.Sum())
+	for _, v := range histogram.SortedView() {
+		if v.Occurrence > 0 {
+			println(fmt.Sprintf("   %s %02f", v.Key, v.Occurrence))
+		}
+
+	}
 	return nil
 }
 
