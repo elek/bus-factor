@@ -72,11 +72,11 @@ func timeline(repo string, window string, verbose bool) error {
 	}
 	for _, category := range timeline.Keys() {
 		month := timeline.Get(category)
-		fmt.Printf("%s %.2f\n", category, month.DevPower())
+		fmt.Printf("%s %.2f %d %f\n", category, month.DevPower(), len(month.PonyDevs()), month.Sum())
 		if verbose {
 			for _, v := range month.SortedView() {
 				if v.Occurrence != 0 {
-					fmt.Printf("   %s %f\n", v.Key, v.Occurrence)
+					fmt.Printf("   %s %.1f\n", v.Key, v.Occurrence)
 				}
 			}
 		}
@@ -84,7 +84,7 @@ func timeline(repo string, window string, verbose bool) error {
 
 	return nil
 }
-func run(repo string) error {
+func run(repo string,  ) error {
 	var histogram Histogram
 	var err error
 	histogram, err = ReadGitLog(repo)
