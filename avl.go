@@ -191,7 +191,7 @@ func AVL(repo string) ([]string, error) {
 	}
 	factor := 0
 	for _, owner := range owners.TopOwners() {
-		if owners.FilesWithoutOwners() > owners.AllFiles()/2 {
+		if owners.FilesWithoutOwners() > owners.AllFiles()/2     {
 			return codeOwners, nil
 		}
 		owners.RemoveOwner(owner)

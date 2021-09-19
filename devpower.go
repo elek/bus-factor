@@ -27,7 +27,7 @@ func (h *Histogram) DevPower() float64 {
 	return result
 }
 
-func (h *Histogram) RawDevPower() float64 {
+func (h *Histogram) LeadFactor() float64 {
 	result := float64(0)
 	base := float64(0)
 	for _, entry := range h.SortedView() {

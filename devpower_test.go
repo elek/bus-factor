@@ -17,7 +17,7 @@ func TestDevPower(t *testing.T) {
 
 	h = createHistogram(10, 10, 5, 5)
 	assert.Equal(t, float64(2.5), h.DevPower())
-	assert.Equal(t, float64(3), h.RawDevPower())
+	assert.Equal(t, float64(3), h.LeadFactor())
 
 
 
