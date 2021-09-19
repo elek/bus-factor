@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 )
 
 type GitAuthorAlias struct {
@@ -52,6 +53,38 @@ func ReadGitLog(repo string) (Histogram, error) {
 
 	err = cIter.ForEach(func(c *object.Commit) error {
 		histogram.Increment(alias.Normalize(c.Author.Email))
+		return nil
+	})
+	if err != nil {
+		return histogram, err
+	}
+	return histogram, nil
+}
+
+func ReadGitLogSince(repo string, from time.Time) (Histogram, error) {
+	histogram := NewHistogram()
+
+	r, err := git.PlainOpen(repo)
+	if err != nil {
+		return histogram, err
+	}
+
+	ref, err := r.Head()
+	if err != nil {
+		return histogram, err
+	}
+
+	cIter, err := r.Log(&git.LogOptions{From: ref.Hash()})
+
+	alias, err := ReadGitAuthorAlias(repo)
+	if err != nil {
+		return histogram, err
+	}
+
+	err = cIter.ForEach(func(c *object.Commit) error {
+		if c.Author.When.After(from) {
+			histogram.Increment(alias.Normalize(c.Author.Email))
+		}
 		return nil
 	})
 	if err != nil {

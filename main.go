@@ -5,6 +5,7 @@ import (
 	cli "github.com/urfave/cli"
 	"os"
 	"strconv"
+	"time"
 )
 
 var App = cli.NewApp()
@@ -39,6 +40,22 @@ func main() {
 			},
 			Action: func(ctx *cli.Context) error {
 				return timeline(repo(ctx.String("repo")), ctx.String("window"), ctx.Bool("verbose"))
+			},
+		},
+		{
+			Name:        "show",
+			Description: "show raw grouped data",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name: "repo",
+				},
+				cli.IntFlag{
+					Name:  "days",
+					Value: 0,
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				return show(repo(ctx.String("repo")), ctx.Int("days"))
 			},
 		},
 	}
@@ -84,7 +101,23 @@ func timeline(repo string, window string, verbose bool) error {
 
 	return nil
 }
-func run(repo string,  ) error {
+
+func show(repo string, days int) error {
+	from := time.Time{}
+	if days > 0 {
+		from = time.Now().Add(time.Duration(days*-1) * time.Hour * 24)
+	}
+	histogram, err := ReadGitLogSince(repo, from)
+	if err != nil {
+		return err
+	}
+	for _, entry := range histogram.SortedView() {
+		fmt.Printf("%0.2f %s\n", entry.Occurrence, entry.Key)
+	}
+	return nil
+}
+
+func run(repo string) error {
 	var histogram Histogram
 	var err error
 	histogram, err = ReadGitLog(repo)
