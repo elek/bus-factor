@@ -2,8 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
-	"github.com/urfave/cli"
 	"math"
 	"os/exec"
 	"strings"
@@ -191,7 +189,7 @@ func AVL(repo string) ([]string, error) {
 	}
 	factor := 0
 	for _, owner := range owners.TopOwners() {
-		if owners.FilesWithoutOwners() > owners.AllFiles()/2     {
+		if owners.FilesWithoutOwners() > owners.AllFiles()/2 {
 			return codeOwners, nil
 		}
 		owners.RemoveOwner(owner)
@@ -207,23 +205,4 @@ func NewDOARepo() DOARepo {
 		Files:   make(map[string]*HistogramWithLast),
 		Renames: make(map[string]string),
 	}
-}
-
-func init() {
-	App.Commands = append(App.Commands, cli.Command{
-		Name: "avl",
-		Flags: []cli.Flag{
-			cli.StringFlag{
-				Name: "repo",
-			},
-		},
-		Action: func(c *cli.Context) error {
-			res, err := AVL(repo(c.String("repo")))
-			if err != nil {
-				return err
-			}
-			fmt.Printf("%d", len(res))
-			return nil
-		},
-	})
 }

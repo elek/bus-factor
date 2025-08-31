@@ -2,85 +2,64 @@ package main
 
 import (
 	"fmt"
-	cli "github.com/urfave/cli"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/alecthomas/kong"
 )
 
-var App = cli.NewApp()
+type CLI struct {
+	Summary  SummaryCmd  `cmd:"" help:"Show summary report"`
+	Timeline TimelineCmd `cmd:"" help:"Show timeline report"`
+	Show     ShowCmd     `cmd:"" help:"Show raw grouped data"`
+}
+
+type SummaryCmd struct {
+	Repo       string `help:"Repository path" short:"r" default:"."`
+	ReportType string `help:"Report to show (default: all)"`
+	Type       string `help:"Display only the selected report type (avl, dev, lead, pony)" short:"t"`
+	Days       int    `help:"Number of days to look back" short:"d" default:"0"`
+}
+
+func (t SummaryCmd) Run() error {
+	return summary(repo(t.Repo), t.Days, t.ReportType)
+}
+
+type TimelineCmd struct {
+	Repo    string `help:"Repository path" short:"r" default:"."`
+	Verbose bool   `help:"Verbose output" short:"v"`
+	Window  string `help:"Window (e.g. Q)" short:"w" default:"Q"`
+}
+
+func (t TimelineCmd) Run() error {
+	return timeline(repo(t.Repo), t.Window, t.Verbose)
+}
+
+type ShowCmd struct {
+	Repo string `help:"Repository path" short:"r" default:"."`
+	Days int    `help:"Number of days to look back" short:"d" default:"0"`
+}
+
+func (t ShowCmd) Run() error {
+	return show(repo(t.Repo), t.Days)
+}
 
 func main() {
-	App.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name: "repo",
-		},
-	}
-	App.Commands = []cli.Command{
-		{
-			Name: "summary",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name: "repo",
-				},
-				cli.StringFlag{
-					Name:  "type",
-					Usage: "display only the selected report type (avl, dev, lead, pony)",
-				},
-				cli.IntFlag{
-					Name:  "days",
-					Value: 0,
-				},
-			},
-			Action: func(ctx *cli.Context) error {
-				return run(repo(ctx.String("repo")), ctx.Int("days"), ctx.String("type"))
-			},
-		},
-		{
-			Name: "timeline",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name: "repo",
-				},
-				cli.BoolFlag{
-					Name: "verbose",
-				},
-				cli.StringFlag{
-					Name:  "window",
-					Value: "Q",
-				},
-			},
-			Action: func(ctx *cli.Context) error {
-				return timeline(repo(ctx.String("repo")), ctx.String("window"), ctx.Bool("verbose"))
-			},
-		},
-		{
-			Name:        "show",
-			Description: "show raw grouped data",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name: "repo",
-				},
-				cli.IntFlag{
-					Name:  "days",
-					Value: 0,
-				},
-			},
-			Action: func(ctx *cli.Context) error {
-				return show(repo(ctx.String("repo")), ctx.Int("days"))
-			},
-		},
-	}
-	err := App.Run(os.Args)
-
+	var cli CLI
+	ktx := kong.Parse(&cli,
+		kong.Name("bus-factor"),
+		kong.Description("A git report tool."),
+	)
+	err := ktx.Run()
 	if err != nil {
-		fmt.Printf("%+v", err)
+		fmt.Printf("%+v\n", err)
 		os.Exit(-1)
 	}
 }
 
 func repo(s string) string {
-	if s != "" {
+	if s != "" && s != "." {
 		return s
 	}
 	pwd, err := os.Getwd()
@@ -131,7 +110,7 @@ func show(repo string, days int) error {
 	return nil
 }
 
-func run(repo string, days int, reportType string) error {
+func summary(repo string, days int, reportType string) error {
 	var histogram Histogram
 	var err error
 	from := time.Time{}
@@ -170,4 +149,3 @@ func run(repo string, days int, reportType string) error {
 	}
 	return nil
 }
-

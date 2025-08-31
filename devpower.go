@@ -1,10 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"github.com/urfave/cli"
-)
-
 func (h *Histogram) DevPower() float64 {
 	result := float64(0)
 	base := float64(0)
@@ -44,24 +39,3 @@ func NewDoubleHistogram() DoubleHistogram {
 		Histograms: make(map[string]*Histogram),
 	}
 }
-
-func init() {
-	App.Commands = append(App.Commands, cli.Command{
-		Name: "dp",
-		Flags: []cli.Flag{
-			cli.StringFlag{
-				Name: "repo",
-			},
-		},
-		Action: func(c *cli.Context) error {
-			histogram, err := ReadGitLog(repo(c.String("repo")))
-			if err != nil {
-				return err
-			}
-			dp := histogram.DevPower()
-			fmt.Printf("%f", dp)
-			return nil
-		},
-	})
-}
-

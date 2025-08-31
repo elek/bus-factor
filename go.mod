@@ -3,6 +3,7 @@ module github.com/elek/bus-factor
 go 1.15
 
 require (
+	github.com/alecthomas/kong v1.12.1 // indirect
 	github.com/go-git/go-git/v5 v5.1.0
 	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli v1.22.4
