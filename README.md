@@ -44,5 +44,20 @@ See: https://en.wikipedia.org/wiki/Herfindahl%E2%80%93Hirschman_index
 
 Usage: execute application from a git repository.
 
+Either you need a full clone, or you can clone only the commits:
+
+```
+git clone --filter=blob:none --shallow-since="30 days ago" https://github.com/apache/ozone.git
+```
+
+or 
+
+```
+git clone --filter=blob:none https://github.com/apache/ozone.git
+```
+
+Check summary with `bus-factor summary`
+
+
 Author mapping: You can make a `.git/bus-factor-alias` file which contains `alias@email.com,author@email.com` lines as mapping. (In case some of the authors use multiple emails). The first email (author) will be replaced with the second one.
 

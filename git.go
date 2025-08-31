@@ -132,8 +132,8 @@ func ReadMonthlyGitLog(repo string, window string) (DoubleHistogram, error) {
 		histogram.Get(category).Increment(alias.Normalize(c.Author.Email))
 		return nil
 	})
-	if err != nil {
-		return histogram, err
+	if err != nil && err.Error() != "object not found" {
+		return histogram, errors.WithStack(err)
 	}
 	return histogram, nil
 }

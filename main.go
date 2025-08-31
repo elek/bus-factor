@@ -30,7 +30,7 @@ func (t SummaryCmd) Run() error {
 type TimelineCmd struct {
 	Repo    string `help:"Repository path" short:"r" default:"."`
 	Verbose bool   `help:"Verbose output" short:"v"`
-	Window  string `help:"Window (e.g. Q)" short:"w" default:"Q"`
+	Window  string `help:"Window (Y/Q/M = year/quarter/month)" short:"w" default:"Q"`
 }
 
 func (t TimelineCmd) Run() error {
@@ -81,7 +81,7 @@ func timeline(repo string, window string, verbose bool) error {
 	}
 	for _, category := range timeline.Keys() {
 		month := timeline.Get(category)
-		fmt.Printf("%s %.2f %d %f\n", category, month.DevPower(), len(month.PonyDevs()), month.Sum())
+		fmt.Printf("%s devp=%.2f pony=%d hhi=%f sum=%f\n", category, month.DevPower(), len(month.PonyDevs()), month.HHI(), month.Sum())
 		if verbose {
 			for _, v := range month.SortedView() {
 				if v.Occurrence != 0 {
