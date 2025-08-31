@@ -14,7 +14,7 @@ Number of developers with biggest contributors, who created the >50% contributio
 
 See: https://humbedooh.com/Chapter%203,%20part%20one_%20Codebase%20development%20resilience.pdf
 
-### Dev power 
+### Dev factor 
 
 Number of devs as the factor of the biggest contributor.
 
@@ -30,6 +30,15 @@ First calculate the significance factor for each contributor. First contributor 
 
 Use these weights to adjust the percentage.
 
+## Lead factor
+
+Summary of the contribution size of each contribution, compared to first developer.
+
+## Herfindahl-Hirschman index
+
+Summary of Squares of market shares (contribution percentage)
+
+See: https://en.wikipedia.org/wiki/Herfindahl%E2%80%93Hirschman_index
 
 ## Usage
 

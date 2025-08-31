@@ -3,8 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
+
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/pkg/errors"
+
 	"os"
 	"path"
 	"strings"
@@ -66,19 +69,20 @@ func ReadGitLogSince(repo string, from time.Time) (Histogram, error) {
 
 	r, err := git.PlainOpen(repo)
 	if err != nil {
-		return histogram, err
+		return histogram, errors.WithStack(err)
 	}
 
 	ref, err := r.Head()
 	if err != nil {
-		return histogram, err
+		return histogram, errors.WithStack(err)
 	}
 
-	cIter, err := r.Log(&git.LogOptions{From: ref.Hash()})
+	since := from.Add(1 * time.Second)
+	cIter, err := r.Log(&git.LogOptions{From: ref.Hash(), Since: &since})
 
 	alias, err := ReadGitAuthorAlias(repo)
 	if err != nil {
-		return histogram, err
+		return histogram, errors.WithStack(err)
 	}
 
 	err = cIter.ForEach(func(c *object.Commit) error {
@@ -87,8 +91,9 @@ func ReadGitLogSince(repo string, from time.Time) (Histogram, error) {
 		}
 		return nil
 	})
-	if err != nil {
-		return histogram, err
+	//object not found is possible for shallow clone
+	if err != nil && err.Error() != "object not found" {
+		return histogram, errors.WithStack(err)
 	}
 	return histogram, nil
 }
@@ -160,4 +165,3 @@ func readAliasFile(file string) (map[string]string, error) {
 	}
 	return alias, nil
 }
-

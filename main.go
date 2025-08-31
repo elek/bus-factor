@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/alecthomas/kong"
+	"github.com/pkg/errors"
 )
 
 type CLI struct {
@@ -119,33 +120,41 @@ func summary(repo string, days int, reportType string) error {
 	}
 	histogram, err = ReadGitLogSince(repo, from)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
-	if reportType == "" || reportType == "pony" {
-		pony := histogram.PonyDevs()
-		println("Pony number: " + strconv.Itoa(len(pony)))
-		for _, v := range pony {
-			println(fmt.Sprintf("   %s %02f", v.Key, v.Occurrence))
-		}
+	fmt.Println("Number of commits: ", histogram.Sum())
+	var reports []string
+	if reportType == "" {
+		reports = []string{"pony", "lead", "dev", "hhi", "avl"}
+	} else {
+		reports = []string{reportType}
 	}
-
-	if reportType == "" || reportType == "dev" {
-		fmt.Printf("Dev power %0.2f\n", histogram.DevPower())
-	}
-	if reportType == "" || reportType == "lead" {
-		fmt.Printf("Lead factor %0.2f\n", histogram.LeadFactor())
-	}
-
-	if reportType == "" || reportType == "avl" {
-		res, err := AVL(repo)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("AVL bus factor: %d\n", len(res))
-		for _, author := range res {
-			fmt.Println("  " + author)
+	for _, r := range reports {
+		switch r {
+		case "pony":
+			pony := histogram.PonyDevs()
+			println("Pony number: " + strconv.Itoa(len(pony)))
+			for _, v := range pony {
+				println(fmt.Sprintf("   %s %02f", v.Key, v.Occurrence))
+			}
+		case "hhi":
+			fmt.Printf("Herfindahl-Hirschman index: %0.2f\n", histogram.HHI())
+		case "dev":
+			fmt.Printf("Dev power %0.2f\n", histogram.DevPower())
+		case "lead":
+			fmt.Printf("Lead factor: %0.2f\n", histogram.LeadFactor())
+		case "avl":
+			res, err := AVL(repo)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("AVL bus factor: %d\n", len(res))
+			for _, author := range res {
+				fmt.Println("  " + author)
+			}
 		}
 	}
 	return nil
+
 }

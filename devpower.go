@@ -27,9 +27,9 @@ func (h *Histogram) LeadFactor() float64 {
 	base := float64(0)
 	for _, entry := range h.SortedView() {
 		if base == 0 {
-			base = float64(entry.Occurrence)
+			base = entry.Occurrence
 		}
-		result += float64(entry.Occurrence) / base
+		result += entry.Occurrence / base
 	}
 	return result
 }
