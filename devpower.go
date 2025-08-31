@@ -7,7 +7,7 @@ func (h *Histogram) DevPower() float64 {
 	previous := float64(1)
 	for _, entry := range h.SortedView() {
 		if base == 0 {
-			base = float64(entry.Occurrence)
+			base = entry.Occurrence
 		} else {
 			if entry.Occurrence > 0 {
 				weight = weight * entry.Occurrence / previous
@@ -17,7 +17,7 @@ func (h *Histogram) DevPower() float64 {
 		}
 		previous = entry.Occurrence
 
-		result += (float64(entry.Occurrence) / base) * weight
+		result += (entry.Occurrence / base) * weight
 	}
 	return result
 }
